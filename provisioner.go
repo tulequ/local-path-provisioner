@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -166,6 +167,8 @@ func (p *LocalPathProvisioner) watchAndRefreshConfig() {
 	}()
 }
 
+var randPath = rand.New(rand.NewSource(time.Now().Unix()))
+
 func (p *LocalPathProvisioner) getPathOnNode(node string, requestedPath string) (string, error) {
 	p.configMutex.RLock()
 	defer p.configMutex.RUnlock()
@@ -205,8 +208,12 @@ func (p *LocalPathProvisioner) getPathOnNode(node string, requestedPath string) 
 	}
 	// if no particular path was requested, choose a random one
 	path := ""
+	i := randPath.Intn(len(paths))
 	for path = range paths {
-		break
+		if i == 0 {
+			break
+		}
+		i--
 	}
 	return path, nil
 }
